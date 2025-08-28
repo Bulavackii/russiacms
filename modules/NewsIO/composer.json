@@ -1,0 +1,9 @@
+{
+  "name": "modules/news-io",
+  "type": "library",
+  "autoload": {
+    "psr-4": {
+      "Modules\\NewsIO\\": ""
+    }
+  }
+}
