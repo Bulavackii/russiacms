@@ -1,13 +1,11 @@
-<aside x-data="{ collapsed: window.innerWidth < 1024 }"
-       x-init="collapsed = window.innerWidth < 1024; window.addEventListener('resize', () => collapsed = window.innerWidth < 1024)"
-       x-cloak
-       x-bind:class="collapsed ? 'w-16' : 'w-64'"
-       class="fixed top-0 left-0 h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 shadow-lg flex flex-col z-40 transition-all duration-300">
+<aside x-data="{ collapsed: window.innerWidth < 1024 }" x-init="collapsed = window.innerWidth < 1024;
+window.addEventListener('resize', () => collapsed = window.innerWidth < 1024)" x-cloak x-bind:class="collapsed ? 'w-16' : 'w-64'"
+    class="fixed top-0 left-0 h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 shadow-lg flex flex-col z-40 transition-all duration-300">
 
     {{-- 🔷 Верхняя панель --}}
     <div class="flex items-center px-4 py-4 border-b border-gray-200 dark:border-gray-800 bg-gray-900">
         <button @click="collapsed = !collapsed"
-                class="flex items-center gap-3 text-white text-base font-semibold tracking-tight focus:outline-none w-full">
+            class="flex items-center gap-3 text-white text-base font-semibold tracking-tight focus:outline-none w-full">
             <i :class="collapsed ? 'fas fa-angle-double-right' : 'fas fa-angle-double-left'" class="text-xl"></i>
             <span x-show="!collapsed" class="truncate">Панель управления</span>
         </button>
@@ -17,7 +15,7 @@
     <nav class="flex-1 overflow-y-auto px-2 py-4 space-y-6 text-[15px] font-medium">
         {{-- 📂 Контент --}}
         @php
-            // активность определяем по ИМЕНАМ роутов (routeIs), а не по URL
+            // активность определяем по именам роутов (routeIs)
             $contentLinks = [
                 [
                     'route' => route('admin.menus.index'),
@@ -58,24 +56,25 @@
                 // 🧩 Импорт/Экспорт новостей (NewsIO)
                 [
                     'route' => route('admin.newsio.index'),
-                    'route_name' => 'admin.newsio.*',   // <-- ключевое отличие
-                    'icon'  => 'fa-file-export',
+                    'route_name' => 'admin.newsio.*',
+                    'icon' => 'fa-file-export',
                     'label' => 'Импорт/Экспорт',
                 ],
             ];
 
-            $baseLinkCls   = 'flex items-center gap-3 px-3 py-2 rounded-md transition group';
+            $baseLinkCls = 'flex items-center gap-3 px-3 py-2 rounded-md transition group';
             $activeLinkCls = 'bg-black text-white font-semibold shadow-md';
-            $idleLinkCls   = 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-black dark:hover:text-white';
+            $idleLinkCls =
+                'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-black dark:hover:text-white';
         @endphp
 
         <div>
             <p x-show="!collapsed"
-               class="text-[11px] uppercase text-gray-400 dark:text-gray-500 font-semibold px-2 mb-1">Контент</p>
+                class="text-[11px] uppercase text-gray-400 dark:text-gray-500 font-semibold px-2 mb-1">Контент</p>
             @foreach ($contentLinks as $link)
                 @php $isActive = request()->routeIs($link['route_name']); @endphp
                 <a href="{{ $link['route'] }}"
-                   class="{{ $baseLinkCls }} {{ $isActive ? $activeLinkCls : $idleLinkCls }}">
+                    class="{{ $baseLinkCls }} {{ $isActive ? $activeLinkCls : $idleLinkCls }}">
                     <i class="fas {{ $link['icon'] }} w-5 text-center"></i>
                     <span x-show="!collapsed">{{ $link['label'] }}</span>
                 </a>
@@ -84,7 +83,6 @@
 
         {{-- ⚙️ Система --}}
         @php
-            // тут часть ссылок без именованных роутов — оставляем проверку по URL
             $systemLinks = [
                 [
                     'url' => '/admin/modules',
@@ -110,15 +108,37 @@
                     'icon' => 'fa-bell',
                     'label' => 'Уведомления',
                 ],
+                // 🎨 Темы (Visual Themes)
+                Route::has('admin.visual.themes.index')
+                    ? [
+                        'url' => route('admin.visual.themes.index'),
+                        'check' => request()->routeIs('admin.visual.themes.*'),
+                        'icon' => 'fa-palette',
+                        'label' => 'Темы',
+                    ]
+                    : null,
+                // 🧩 Фрагменты (Visual Fragments)
+                Route::has('admin.visual.fragments.index')
+                    ? [
+                        'url' => route('admin.visual.fragments.index'),
+                        'check' => request()->routeIs('admin.visual.fragments.*'),
+                        'icon' => 'fa-puzzle-piece',
+                        'label' => 'Фрагменты',
+                    ]
+                    : null,
             ];
+
+            // убрать null, если роутов ещё нет
+            $systemLinks = array_values(array_filter($systemLinks));
         @endphp
+
 
         <div>
             <p x-show="!collapsed"
-               class="text-[11px] uppercase text-gray-400 dark:text-gray-500 font-semibold px-2 mb-1">Система</p>
+                class="text-[11px] uppercase text-gray-400 dark:text-gray-500 font-semibold px-2 mb-1">Система</p>
             @foreach ($systemLinks as $link)
                 <a href="{{ $link['url'] }}"
-                   class="{{ $baseLinkCls }} {{ $link['check'] ? $activeLinkCls : $idleLinkCls }}">
+                    class="{{ $baseLinkCls }} {{ $link['check'] ? $activeLinkCls : $idleLinkCls }}">
                     <i class="fas {{ $link['icon'] }} w-5 text-center"></i>
                     <span x-show="!collapsed">{{ $link['label'] }}</span>
                 </a>
@@ -138,10 +158,10 @@
         @endphp
         <div>
             <p x-show="!collapsed"
-               class="text-[11px] uppercase text-gray-400 dark:text-gray-500 font-semibold px-2 mb-1">Доступность</p>
+                class="text-[11px] uppercase text-gray-400 dark:text-gray-500 font-semibold px-2 mb-1">Доступность</p>
             @foreach ($accessibilityLinks as $link)
                 <a href="{{ $link['url'] }}"
-                   class="{{ $baseLinkCls }} {{ $link['check'] ? $activeLinkCls : $idleLinkCls }}">
+                    class="{{ $baseLinkCls }} {{ $link['check'] ? $activeLinkCls : $idleLinkCls }}">
                     <i class="fas {{ $link['icon'] }} w-5 text-center"></i>
                     <span x-show="!collapsed">{{ $link['label'] }}</span>
                 </a>
@@ -174,10 +194,10 @@
 
         <div>
             <p x-show="!collapsed"
-               class="text-[11px] uppercase text-gray-400 dark:text-gray-500 font-semibold px-2 mb-1">Оплата</p>
+                class="text-[11px] uppercase text-gray-400 dark:text-gray-500 font-semibold px-2 mb-1">Оплата</p>
             @foreach ($paymentLinks as $link)
                 <a href="{{ $link['url'] }}"
-                   class="{{ $baseLinkCls }} {{ $link['check'] ? $activeLinkCls : $idleLinkCls }}">
+                    class="{{ $baseLinkCls }} {{ $link['check'] ? $activeLinkCls : $idleLinkCls }}">
                     <i class="fas {{ $link['icon'] }} w-5 text-center"></i>
                     <span x-show="!collapsed">{{ $link['label'] }}</span>
                 </a>
@@ -187,7 +207,7 @@
 
     {{-- 💡 Совет дня --}}
     <div x-show="!collapsed"
-         class="px-5 py-3 text-xs text-gray-500 dark:text-gray-400 italic bg-gray-50 dark:bg-gray-800 border-t border-b border-gray-200 dark:border-gray-700">
+        class="px-5 py-3 text-xs text-gray-500 dark:text-gray-400 italic bg-gray-50 dark:bg-gray-800 border-t border-b border-gray-200 dark:border-gray-700">
         @php
             $tips = [
                 '🧠 Хорошая структура — залог масштабируемости.',

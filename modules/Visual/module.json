@@ -1,0 +1,10 @@
+{
+  "name": "Visual",
+  "version": "1.0.0",
+  "active": true,
+  "priority": 100,
+  "description": "Visual editor & themes manager",
+  "providers": [
+    "Modules\\\\Visual\\\\Providers\\\\VisualServiceProvider"
+  ]
+}

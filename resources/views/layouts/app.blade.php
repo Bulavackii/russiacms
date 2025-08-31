@@ -14,6 +14,23 @@
 
     <!-- Styles / Scripts -->
     @vite(['resources/css/app.css'])
+
+    {{-- 🎨 Активная тема --}}
+    @if(isset($__activeTheme) && $__activeTheme)
+        <style id="theme-tokens">
+            :root {
+                @foreach(data_get($__activeTheme->tokens, 'colors', []) as $k => $v)
+                    --color-{{ $k }}: {{ $v }};
+                @endforeach
+                @foreach(data_get($__activeTheme->tokens, 'radius', []) as $k => $v)
+                    --radius-{{ $k }}: {{ $v }};
+                @endforeach
+                @foreach(data_get($__activeTheme->tokens, 'font', []) as $k => $v)
+                    --font-{{ $k }}: {{ $v }};
+                @endforeach
+            }
+        </style>
+    @endif
 </head>
 
 <body class="font-sans antialiased bg-gray-100 text-gray-800">

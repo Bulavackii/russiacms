@@ -13,6 +13,8 @@ use Modules\Notifications\View\Components\Frontend\NotificationsComponent;
 use Modules\Accessibility\View\Components\AccessibilityWidget;
 use Modules\News\Models\News;
 use App\Observers\NewsObserver;
+// 🎨 ДОБАВЛЕНО: активная тема
+use Modules\Visual\Models\Theme;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -50,23 +52,69 @@ class AppServiceProvider extends ServiceProvider
             Schema::hasTable('modules')
         ) {
             $activeModules = Module::where('active', true)->pluck('name');
+
             foreach ($activeModules as $moduleName) {
                 $base = $modulesPath . '/' . $moduleName;
-                if (is_dir($base)) {
-                    if (file_exists("{$base}/Routes/web.php")) {
-                        $this->loadRoutesFrom("{$base}/Routes/web.php");
+
+                if (!is_dir($base)) {
+                    // 🧹 Модуль отсутствует физически — чистим запись
+                    Module::where('name', $moduleName)->delete();
+                    continue;
+                }
+
+                // 1) Маршруты (стандартный путь)
+                if (file_exists("{$base}/Routes/web.php")) {
+                    $this->loadRoutesFrom("{$base}/Routes/web.php");
+                }
+
+                // 2) Вьюхи — поддерживаем оба расположения
+                $viewsDirs = [
+                    "{$base}/Views",
+                    "{$base}/Resources/views",
+                ];
+                foreach ($viewsDirs as $dir) {
+                    if (is_dir($dir)) {
+                        $this->loadViewsFrom($dir, $moduleName);
                     }
-                    if (is_dir("{$base}/Views")) {
-                        $this->loadViewsFrom("{$base}/Views", $moduleName);
+                }
+
+                // 3) Миграции — поддерживаем оба расположения
+                $migrationsDirs = [
+                    "{$base}/Migrations",
+                    "{$base}/Database/Migrations",
+                ];
+                foreach ($migrationsDirs as $dir) {
+                    if (is_dir($dir)) {
+                        $this->loadMigrationsFrom($dir);
                     }
-                    if (is_dir("{$base}/Migrations")) {
-                        $this->loadMigrationsFrom("{$base}/Migrations");
+                }
+
+                // 4) Переводы — оба расположения
+                $langDirs = [
+                    "{$base}/Lang",
+                    "{$base}/Resources/lang",
+                ];
+                foreach ($langDirs as $dir) {
+                    if (is_dir($dir)) {
+                        $this->loadTranslationsFrom($dir, $moduleName);
                     }
-                    if (is_dir("{$base}/Lang")) {
-                        $this->loadTranslationsFrom("{$base}/Lang", $moduleName);
+                }
+
+                // 5) (Опционально) Провайдеры из module.json — если указаны
+                $moduleJson = "{$base}/module.json";
+                if (file_exists($moduleJson)) {
+                    try {
+                        $meta = json_decode(file_get_contents($moduleJson), true) ?: [];
+                        if (!empty($meta['providers']) && is_array($meta['providers'])) {
+                            foreach ($meta['providers'] as $providerClass) {
+                                if (class_exists($providerClass)) {
+                                    $this->app->register($providerClass);
+                                }
+                            }
+                        }
+                    } catch (\Throwable $e) {
+                        // молча пропускаем, чтобы ничего не сломать
                     }
-                } else {
-                    Module::where('name', $moduleName)->delete(); // 🧹 Чистим записи модулей, которых нет
                 }
             }
         }
@@ -148,6 +196,17 @@ class AppServiceProvider extends ServiceProvider
             } catch (\Throwable $e) {
                 $view->with('accessibility', null);
             }
+        });
+
+        View::composer('layouts.*', function ($view) {
+            try {
+                $theme = class_exists(Theme::class) && Schema::hasTable('visual_themes')
+                    ? Theme::where('is_default', true)->first()
+                    : null;
+            } catch (\Throwable $e) {
+                $theme = null;
+            }
+            $view->with('__activeTheme', $theme);
         });
 
         // ✅ JWT API маршруты
