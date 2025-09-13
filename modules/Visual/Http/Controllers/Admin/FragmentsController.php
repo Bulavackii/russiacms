@@ -34,7 +34,10 @@ class FragmentsController extends Controller
             }
         }
 
-        $fragment = new Fragment(['is_active' => true]);
+        $fragment = new Fragment([
+            'is_active' => true,
+            'type'      => 'blade', // дефолт, чтобы форма уже содержала значение
+        ]);
 
         if ($preset === 'header') {
             $fragment->fill([
@@ -56,8 +59,11 @@ class FragmentsController extends Controller
     public function store(Request $request)
     {
         $data = $this->validated($request);
-        $this->applyReservedGuard($data, null);   // фиксация zone, если создаём системный slug
+        $this->applyReservedGuard($data, null);   // фиксируем зону для системных slug
         $data['updated_by'] = Auth::id();
+
+        // гарантируем, что поле type всегда есть (иначе БД ругнётся)
+        $data['type'] = $data['type'] ?? 'blade';
 
         $fragment = Fragment::create($data);
         $this->renderToCache($fragment);
@@ -78,6 +84,9 @@ class FragmentsController extends Controller
         $data = $this->validated($request, $fragment->id);
         $this->applyReservedGuard($data, $fragment); // фиксируем slug и zone для системных
         $data['updated_by'] = Auth::id();
+
+        // не позволяем "забыть" тип
+        $data['type'] = $data['type'] ?? ($fragment->type ?: 'blade');
 
         $fragment->fill($data);
         $this->renderToCache($fragment);
@@ -127,37 +136,36 @@ class FragmentsController extends Controller
     protected function validated(Request $request, ?int $id = null): array
     {
         $rules = [
-            'title'     => ['required', 'string', 'max:255'],
-            'slug'      => [
-                'required', 'string', 'max:255', 'alpha_dash',
-                Rule::unique('visual_fragments', 'slug')->ignore($id),
-            ],
-            'zone'      => ['nullable', Rule::in(['header','footer','custom'])],
-            'type'      => ['nullable', 'string', 'max:100'],
-            'is_active' => ['sometimes', 'boolean'],
-            // schema/data могут прилететь строкой JSON или массивом
-            'schema'    => ['nullable'],
-            'data'      => ['nullable'],
+            'title'       => ['required', 'string', 'max:255'],
+            'slug'        => ['required', 'string', 'max:255', 'alpha_dash', Rule::unique('visual_fragments', 'slug')->ignore($id)],
+            'zone'        => ['nullable', Rule::in(['header', 'footer', 'custom'])],
+            'type'        => ['nullable', 'string', 'max:100'],   // может не прийти из формы
+            'is_active'   => ['sometimes', 'boolean'],
+            // schema/data могут прийти строкой JSON или массивом
+            'schema'      => ['nullable'],
+            'data'        => ['nullable'],
             // дополнительные поля оставляем «как есть»
-            'css_inline'   => ['nullable', 'string'],
-            'html_cached'  => ['nullable', 'string'],
+            'css_inline'  => ['nullable', 'string'],
+            'html_cached' => ['nullable', 'string'],
         ];
 
         $data = $request->validate($rules);
 
-        // Приведём schema/data к массиву, если они пришли строкой JSON
+        // Нормализуем schema/data в массивы
         foreach (['schema', 'data'] as $jsonField) {
-            if (array_key_exists($jsonField, $data)) {
-                if (is_string($data[$jsonField]) && $data[$jsonField] !== '') {
-                    $decoded = json_decode($data[$jsonField], true);
-                    $data[$jsonField] = is_array($decoded) ? $decoded : [];
-                } elseif (!is_array($data[$jsonField])) {
-                    $data[$jsonField] = [];
-                }
+            if (!array_key_exists($jsonField, $data)) {
+                $data[$jsonField] = [];
+                continue;
+            }
+            if (is_string($data[$jsonField]) && $data[$jsonField] !== '') {
+                $decoded = json_decode($data[$jsonField], true);
+                $data[$jsonField] = is_array($decoded) ? $decoded : [];
+            } elseif (!is_array($data[$jsonField])) {
+                $data[$jsonField] = [];
             }
         }
 
-        // По умолчанию делаем активным, если чекбокс не отправлен
+        // По умолчанию включаем фрагмент
         $data['is_active'] = (bool) ($data['is_active'] ?? true);
 
         return $data;
@@ -165,23 +173,21 @@ class FragmentsController extends Controller
 
     /**
      * Закрепляем slug/zone для системных фрагментов.
-     * - При UPDATE: если существующий slug системный — не позволяем переименовать и принудительно фиксируем зону.
-     * - При CREATE/UPDATE: если в данных пришёл системный slug — принудительно задаём корректную зону.
      *
      * @param array         $data     данные формы (по ссылке)
      * @param Fragment|null $existing текущая модель при update, null при store
      */
     protected function applyReservedGuard(array &$data, ?Fragment $existing = null): void
     {
-        // Если редактируем уже существующий системный фрагмент — slug не меняем
+        // Если редактируем существующий системный — запретим менять slug
         if ($existing && in_array($existing->slug, ['site-header', 'site-footer'], true)) {
             $data['slug'] = $existing->slug;
         }
 
-        // Определяем итоговый slug (из данных формы или из существующей модели)
+        // Определим какой slug должен быть закреплён
         $slug = $data['slug'] ?? ($existing?->slug);
 
-        // Для системных слуг всегда закрепляем правильную зону
+        // Для системных слуг всегда правильная зона
         if ($slug === 'site-header') {
             $data['zone'] = 'header';
         } elseif ($slug === 'site-footer') {

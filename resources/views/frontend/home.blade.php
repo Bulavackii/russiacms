@@ -8,15 +8,12 @@
         position: relative;
         z-index: 0;
     }
-
     body::before {
         content: "";
         position: fixed;
-        top: 0;
-        left: 0;
+        top: 0; left: 0;
         z-index: -1;
-        width: 100%;
-        height: 100%;
+        width: 100%; height: 100%;
         background-image: url('{{ asset('images/fon.jpg') }}');
         background-repeat: repeat;
         background-size: auto;
