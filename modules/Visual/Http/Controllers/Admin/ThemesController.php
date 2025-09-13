@@ -13,6 +13,9 @@ use ZipArchive;
 
 class ThemesController extends Controller
 {
+    /** Диск, куда кладём ассеты тем (публичный). */
+    protected string $disk = 'public';
+
     public function index()
     {
         $themes = Theme::orderByDesc('is_default')->orderBy('title')->get();
@@ -28,15 +31,17 @@ class ThemesController extends Controller
     {
         $data  = $this->validated($request);
         $theme = new Theme($data);
-        $theme->save();                                   // нужен ID для путей хранения
+        $theme->save(); // нужен ID для путей хранения
 
         $this->handleUploads($request, $theme);
         $this->regenerateCss($theme);
         $theme->save();
 
-        Cache::forget('active_theme');
+        // меняли тему — сбросим только id активной (пересчитается на рендере)
+        Cache::forget('active_theme_id');
 
-        return redirect()->route('admin.visual.themes.edit', $theme)
+        return redirect()
+            ->route('admin.visual.themes.edit', $theme)
             ->with('success', 'Тема сохранена');
     }
 
@@ -54,33 +59,19 @@ class ThemesController extends Controller
         $this->regenerateCss($theme);
         $theme->save();
 
-        Cache::forget('active_theme');
+        Cache::forget('active_theme_id');
 
         return back()->with('success', 'Изменения сохранены');
     }
 
-    /**
-     * Сделать тему активной (по умолчанию).
-     */
+    /** Сделать тему активной (по умолчанию). */
     public function apply(Theme $theme)
     {
-        DB::transaction(function () use ($theme) {
-            Theme::where('is_default', true)->update(['is_default' => false]);
-            $theme->is_default = true;
-
-            // Перегенерируем CSS на всякий случай
-            $this->regenerateCss($theme);
-            $theme->save();
-        });
-
-        Cache::forget('active_theme');
-
+        $this->applyTheme($theme);
         return back()->with('success', 'Тема применена');
     }
 
-    /**
-     * Удаление темы.
-     */
+    /** Удаление темы. */
     public function destroy(Theme $theme)
     {
         if ($theme->is_default) {
@@ -88,12 +79,17 @@ class ThemesController extends Controller
         }
 
         // подчистим файлы
-        Storage::deleteDirectory("public/themes/{$theme->id}");
+        Storage::disk($this->disk)->deleteDirectory("themes/{$theme->id}");
+        $deletedId = $theme->id;
         $theme->delete();
 
-        Cache::forget('active_theme');
+        // если удалили активную — сбросить кеш id
+        if (Cache::get('active_theme_id') == $deletedId) {
+            Cache::forget('active_theme_id');
+        }
 
-        return redirect()->route('admin.visual.themes.index')
+        return redirect()
+            ->route('admin.visual.themes.index')
             ->with('success', 'Тема удалена');
     }
 
@@ -105,8 +101,7 @@ class ThemesController extends Controller
             'title' => ['required','string','max:255'],
             'slug'  => ['required','string','max:255','alpha_dash', Rule::unique('visual_themes','slug')->ignore($id)],
 
-            // Токены/конфиг могут быть массивом или JSON-строкой
-            'tokens' => ['nullable'],
+            'tokens' => ['nullable'], // массив или json
             'config' => ['nullable'],
 
             // файлы необязательны
@@ -129,8 +124,7 @@ class ThemesController extends Controller
             }
         }
 
-        // Флажок is_default из формы игнорируем
-        unset($data['is_default']);
+        unset($data['is_default']); // не даём из формы менять активность
 
         return $data;
     }
@@ -140,45 +134,50 @@ class ThemesController extends Controller
      */
     protected function handleUploads(Request $r, Theme $theme): void
     {
-        $dir = "public/themes/{$theme->id}";
-        $cfg = $theme->config ?? [];
+        $disk = $this->disk;
+        $base = "themes/{$theme->id}";
+        $cfg  = $theme->config ?? [];
 
+        // Логотип
         if ($r->hasFile('logo')) {
-            $path = $r->file('logo')->store("$dir", 'local');
-            $cfg['logo_url'] = Storage::url($path);
+            $path = $r->file('logo')->store($base, $disk);
+            $cfg['logo_url'] = Storage::disk($disk)->url($path);
         }
 
+        // Фоновая картинка
         if ($r->hasFile('bg_image')) {
-            $path = $r->file('bg_image')->store("$dir", 'local');
-            $cfg['background_url'] = Storage::url($path);
+            $path = $r->file('bg_image')->store($base, $disk);
+            $cfg['background_url'] = Storage::disk($disk)->url($path);
         }
 
+        // Локальные шрифты
         if ($r->hasFile('font_woff2')) {
-            $path = $r->file('font_woff2')->store("$dir", 'local');
-            $cfg['font_woff2'] = Storage::url($path);
+            $path = $r->file('font_woff2')->store($base, $disk);
+            $cfg['font_woff2'] = Storage::disk($disk)->url($path);
         }
         if ($r->hasFile('font_ttf')) {
-            $path = $r->file('font_ttf')->store("$dir", 'local');
-            $cfg['font_ttf'] = Storage::url($path);
+            $path = $r->file('font_ttf')->store($base, $disk);
+            $cfg['font_ttf'] = Storage::disk($disk)->url($path);
         }
 
+        // Иконки (ZIP)
         if ($r->hasFile('icons_zip')) {
-            $zipPath = $r->file('icons_zip')->store("$dir", 'local');
-            $extract = storage_path("app/$dir/icons");
+            $zipPath  = $r->file('icons_zip')->store($base, $disk);               // themes/{id}/icons.zip
+            $extract  = Storage::disk($disk)->path("$base/icons");                // физический путь
             @mkdir($extract, 0775, true);
 
             $zip = new ZipArchive();
-            if ($zip->open(storage_path("app/$zipPath")) === true) {
+            if ($zip->open(Storage::disk($disk)->path($zipPath)) === true) {
                 $zip->extractTo($extract);
                 $zip->close();
-                $cfg['icons_path'] = asset("storage/themes/{$theme->id}/icons");
+                $cfg['icons_path'] = Storage::disk($disk)->url("$base/icons");    // /storage/themes/{id}/icons
                 $cfg['icon_mode']  = 'svg';
             }
         }
 
-        // Провайдер/название шрифта (для онлайна)
+        // Провайдер/название шрифта (онлайн)
         $cfg['font_provider'] = $r->input('config.font_provider', $cfg['font_provider'] ?? null);
-        $cfg['font_name']     = $r->input('config.font_name', $cfg['font_name'] ?? null);
+        $cfg['font_name']     = $r->input('config.font_name',     $cfg['font_name'] ?? null);
 
         // Режим иконок
         $cfg['icon_mode']     = $r->input('config.icon_mode', $cfg['icon_mode'] ?? 'fa');
@@ -192,7 +191,8 @@ class ThemesController extends Controller
     }
 
     /**
-     * Генерация CSS-переменных из токенов (поддержка вложенных групп)
+     * Генерация CSS-переменных из токенов (поддержка вложенных групп).
+     * В config['css'] держим максимум один блок :root{...}
      */
     protected function regenerateCss(Theme $theme): void
     {
@@ -201,7 +201,9 @@ class ThemesController extends Controller
 
         // colors.*
         foreach ((array) data_get($tokens, 'colors', []) as $k => $v) {
-            $css .= "--color-{$k}: {$v};";
+            if ($v !== null && $v !== '') {
+                $css .= "--color-{$k}: {$v};";
+            }
         }
 
         // radius.md
@@ -213,8 +215,32 @@ class ThemesController extends Controller
 
         $css .= '}';
 
-        $cfg = $theme->config ?? [];
-        $cfg['css'] = ($cfg['css'] ?? '') . "\n" . $css;
+        // Заменяем предыдущий :root на новый, чтобы не плодить дубли
+        $cfg  = $theme->config ?? [];
+        $prev = (string) ($cfg['css'] ?? '');
+        $prev = preg_replace('/\:root\s*\{[^}]*\}\s*/m', '', $prev);
+        $cfg['css'] = trim($prev . "\n" . $css);
+
         $theme->config = $cfg;
+    }
+
+    /** Атомарное применение темы + обновление кэша с ID. */
+    private function applyTheme(Theme $theme): void
+    {
+        DB::transaction(function () use ($theme) {
+            // Снимем флаг со всех КРОМЕ текущей — быстрее и безопаснее
+            Theme::where('id', '!=', $theme->id)->where('is_default', true)->update(['is_default' => false]);
+
+            // Если у текущей уже стоит флаг — ничего не трогаем
+            if (!$theme->is_default) {
+                $theme->is_default = true;
+                $this->regenerateCss($theme); // на всякий случай
+                $theme->save();
+            }
+        });
+
+        Cache::forever('active_theme_id', $theme->id);
+        // почистим старый ключ, если где-то остался
+        Cache::forget('active_theme');
     }
 }
