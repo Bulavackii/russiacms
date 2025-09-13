@@ -3,238 +3,270 @@
 @section('title', 'FAQ — Часто задаваемые вопросы')
 
 @section('content')
-    <div
-        class="max-w-4xl mx-auto bg-white border border-gray-300 rounded-2xl p-8 md:p-10 shadow-xl text-[15px] text-gray-800 space-y-8">
-        {{-- 🧠 Заголовок --}}
-        <h1 class="text-3xl font-extrabold text-center text-blue-800">❓ Часто задаваемые вопросы (FAQ)</h1>
-        <p class="text-center text-gray-600 text-sm -mt-3">Нужна помощь? Здесь собраны ответы на самые популярные вопросы по
-            работе с Ru-CMS</p>
-
-        {{-- 🔍 Вопросы --}}
-        <div class="space-y-6">
-            <div>
-                <h2 class="font-semibold text-blue-700 text-lg">📌 Как зарегистрироваться на сайте?</h2>
-                <p>Нажмите <a href="{{ route('register') }}" class="text-blue-600 hover:underline">«Регистрация»</a> в верхнем
-                    меню. Заполните форму и подтвердите email.</p>
-            </div>
-
-            <div>
-                <h2 class="font-semibold text-blue-700 text-lg">🛠 Я забыл(а) пароль. Что делать?</h2>
-                <p>Перейдите на <a href="{{ route('password.request') }}" class="text-blue-600 hover:underline">страницу
-                        восстановления пароля</a>, введите ваш email — и получите инструкцию на почту.</p>
-            </div>
-
-            <div>
-                <h2 class="font-semibold text-blue-700 text-lg">🏢 Можно ли зарегистрироваться как организация?</h2>
-                <p>Да, при регистрации выберите тип «Юридическое лицо» — появятся поля для ИНН, ОГРН и адреса.</p>
-            </div>
-
-            <div>
-                <h2 class="font-semibold text-blue-700 text-lg">🧩 Где управлять модулями?</h2>
-                <p>В админке на странице <a href="{{ url('/admin/modules') }}"
-                        class="text-blue-600 hover:underline">Модули</a> вы можете включать, отключать, архивировать и
-                    скачивать ZIP-архивы модулей.</p>
-            </div>
-
-            <div>
-                <h2 class="font-semibold text-blue-700 text-lg">🎨 Как подключить свой шаблон?</h2>
-                <p>Создайте файл шаблона в директории: <code
-                        class="bg-gray-100 px-2 py-1 rounded text-xs">resources/views/frontend/templates/название.blade.php</code>.
-                    Он автоматически появится в списке при создании новости.</p>
-            </div>
-
-            <div>
-                <h2 class="font-semibold text-blue-700 text-lg">🖼️ Можно ли использовать видео и изображения?</h2>
-                <p>Да! Вы можете загружать медиафайлы при создании записи (TinyMCE) или использовать <a
-                        href="{{ url('/admin/files') }}" class="text-blue-600 hover:underline">менеджер файлов</a> в
-                    админке.</p>
-            </div>
-
-            <div>
-                <h2 class="font-semibold text-blue-700 text-lg">🔒 Насколько безопасна Ru-CMS?</h2>
-                <p>Ru-CMS использует <strong>bcrypt</strong> для паролей, <strong>JWT</strong> для API-аутентификации и
-                    политику разделения ролей.</p>
-            </div>
-
-            <div>
-                <h2 class="font-semibold text-blue-700 text-lg">⚙️ Как обновить информацию о себе?</h2>
-                <p>Зайдите в <a href="{{ route('dashboard.edit') }}" class="text-blue-600 hover:underline">личный
-                        кабинет</a>, чтобы отредактировать имя, email, пароль и другие данные.</p>
-            </div>
-
-            <div>
-                <h2 class="font-semibold text-blue-700 text-lg">📬 Как обратиться в поддержку?</h2>
-                <p>Вы можете заполнить форму на <a href="{{ url('/contacts') }}"
-                        class="text-blue-600 hover:underline">странице «Контакты»</a> или отправить сообщение через модуль
-                    «Сообщения» в админке.</p>
-            </div>
-        </div>
-
-        {{-- 📦 Инструкция по созданию шаблона --}}
-        <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 mt-12 space-y-4 shadow-sm">
-            <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                🛠 Как создать собственный кастомный шаблон с любым кодом?
-            </h3>
-            <ol class="list-decimal list-inside text-sm text-gray-700 space-y-2">
-                <li>
-                    Создайте Blade-файл в папке
-                    <code class="bg-gray-100 px-1 py-0.5 rounded text-xs">resources/views/frontend/templates/</code>
-                    с именем шаблона, например:
-                    <code class="bg-gray-100 px-2 py-1 rounded text-xs block mt-1">custom.blade.php</code>
-                </li>
-                <li>
-                    Внутри шаблона используйте переменную:
-                    <code class="bg-gray-100 px-2 py-1 rounded text-xs">$templates['custom']</code>
-                    для вывода контента из базы данных.
-                </li>
-                <li>
-                    В файле <code class="text-xs">routes/web.php</code> добавьте имя шаблона в массив
-                    <code class="text-xs">$templateKeys</code>, чтобы он отображался на главной:
-                    <code class="bg-gray-100 px-2 py-1 rounded text-xs block mt-1">'custom'</code>
-                </li>
-                <li>
-                    В админке при создании новости выберите шаблон
-                    <code class="text-xs">custom</code> — CMS подключит нужный файл автоматически.
-                </li>
-                <li>
-                    В контроллере <code class="text-xs">NewsController@index()</code> добавьте строку в массив
-                    шаблонов в $customLabels в private function loadTemplates():
-                    <code class="bg-gray-100 px-2 py-1 rounded text-xs block mt-1">'custom' => 'Пользовательский
-                        шаблон'</code>
-                </li>
-                <li>
-                    Для подключения шаблона на странице используйте:
-                    <code
-                        class="bg-gray-100 px-2 py-1 rounded text-xs block mt-1">&#64;includeIf('frontend.templates.custom',
-                        ['templates' => ['custom' => $templates['custom'] ?? collect()]])</code>
-                </li>
-            </ol>
-
-            <div class="bg-white border border-gray-100 rounded-lg p-4 text-sm text-gray-800">
-                <p class="mb-1 font-semibold">🔧 Пример подключения шаблона на главной:</p>
-                <pre class="bg-gray-100 text-xs rounded p-3 overflow-x-auto">
-&#64;includeIf('frontend.templates.custom', ['templates' => ['custom' => $templates['custom'] ?? collect()]])
-        </pre>
-            </div>
-
-            <p class="text-sm text-gray-500">
-                🧩 Имя файла <code class="text-xs">custom.blade.php</code> должно совпадать с полем
-                <code class="text-xs">template</code> в таблице <code class="text-xs">news</code>.
-                Можно создавать шаблоны для любых целей — «Отзывы», «Галерея», «Портфолио», «Контакты» и др. Если вам до сих
-                пор непонятно - проанализируйте уже созданные и подключенные шаблоны. Они все унифицированы и писались
-                однотипно.
-            </p>
-        </div>
-
-        <div>
-            <h2 class="font-semibold text-blue-700 text-lg">🛠 Полная инструкция по установке Ru-CMS через веб-интерфейс
-            </h2>
-            <ol class="list-decimal list-inside mt-2 text-sm text-gray-800 space-y-2">
-                <li>
-                    <strong>📁 Размещение проекта</strong><br>
-                    Разместите содержимое папки <code class="text-xs">Ru-CMS-main</code> в директории, обслуживаемой
-                    сервером:<br>
-                    <code class="bg-gray-100 px-2 py-1 rounded text-xs block mt-1">/var/www/html/Ru-CMS/</code><br>
-                    Или в корневую папку домена на хостинге.
-                </li>
-                <li>
-                    <strong>🌐 Настройка виртуального хоста (локально)</strong><br>
-                    Для Apache добавьте в конфигурацию:
-                    <pre class="bg-gray-100 p-3 rounded text-xs overflow-x-auto">
-&lt;VirtualHost *:80&gt;
-    ServerName ru-cms.local
-    DocumentRoot /var/www/html/Ru-CMS/public
-
-    &lt;Directory /var/www/html/Ru-CMS/public&gt;
-        AllowOverride All
-        Require all granted
-    &lt;/Directory&gt;
-&lt;/VirtualHost&gt;
-            </pre>
-                    И пропишите в <code class="text-xs">/etc/hosts</code>:
-                    <code class="bg-gray-100 px-2 py-1 rounded text-xs block mt-1">127.0.0.1 ru-cms.local</code>
-                </li>
-                <li>
-                    <strong>📦 Установка зависимостей</strong><br>
-                    В корне проекта выполните:
-                    <pre class="bg-gray-100 p-3 rounded text-xs overflow-x-auto">
-composer install
-npm install
-npm run build
-            </pre>
-                    Если нет Node.js — можно использовать уже скомпилированные стили из <code
-                        class="text-xs">public/build</code>.
-                </li>
-                <li>
-                    <strong>🗝️ Настройка файла .env</strong><br>
-                    Создайте <code class="text-xs">.env</code> из <code class="text-xs">.env backup</code> и укажите
-                    параметры БД:
-                    <pre class="bg-gray-100 p-3 rounded text-xs overflow-x-auto">
-APP_NAME="Ru CMS"
-APP_URL=http://ваш-домен
-DB_CONNECTION=mysql
-DB_HOST=localhost
-DB_PORT=3306
-DB_DATABASE=имя_бд
-DB_USERNAME=юзер
-DB_PASSWORD=пароль
-            </pre>
-                    ⚠️ <strong>Не запускайте</strong> <code class="text-xs">php artisan migrate</code> — всё выполнит
-                    веб-установщик.
-                </li>
-                <li>
-                    <strong>🌐 Запуск установщика</strong><br>
-                    Перейдите в браузере:
-                    <code class="bg-gray-100 px-2 py-1 rounded text-xs block mt-1">http://ваш-домен/install</code><br>
-                    Установщик проведёт вас по шагам:
-                    <ul class="list-disc list-inside mt-1 ml-4 space-y-1">
-                        <li>Проверка системных требований</li>
-                        <li>Подключение к базе данных</li>
-                        <li>Создание администратора</li>
-                        <li>Финальная настройка</li>
-                    </ul>
-                </li>
-                <li>
-                    <strong>✅ После установки</strong><br>
-                    Будет удалён флаг установки, установщик станет недоступен, вы попадёте в админку:
-                    <a href="{{ url('/admin') }}" class="text-blue-600 hover:underline">/admin</a>.
-                </li>
-            </ol>
-
-            <p class="mt-4 text-sm text-gray-600">
-                🧼 Убедитесь, что папки <code class="text-xs">storage/</code> и <code class="text-xs">bootstrap/cache</code>
-                доступны для записи:
-            </p>
-            <pre class="bg-gray-100 p-3 rounded text-xs overflow-x-auto">
-chmod -R 775 storage bootstrap/cache
-    </pre>
-            <p class="text-sm text-gray-600">
-                Файл <code class="text-xs">.htaccess</code> уже настроен и находится в папке <code
-                    class="text-xs">public/</code>.
-            </p>
-        </div>
-
-        {{-- 📚 База знаний --}}
-        <div class="bg-blue-50 border border-blue-100 rounded-xl p-6 mt-12 space-y-4 shadow-sm">
-            <h3 class="text-lg font-semibold text-blue-700 flex items-center gap-2">
-                📚 База знаний и документация
-            </h3>
-            <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
-                <li><a href="{{ url('/about') }}" class="text-blue-600 hover:underline">Что такое Ru-CMS и как она
-                        работает?</a></li>
-                <li><a href="{{ url('/faq') }}" class="text-blue-600 hover:underline">Настройка шаблонов, блоков и
-                        категорий</a></li>
-                <li><a href="{{ url('/contacts') }}" class="text-blue-600 hover:underline">Как получить помощь и
-                        поддержку</a></li>
-            </ul>
-        </div>
-
-        {{-- 🔙 Кнопка назад --}}
-        <div class="text-center pt-10">
-            <a href="{{ url('/') }}"
-                class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow hover:scale-105 transition-all">
-                <i class="fas fa-arrow-left mr-2"></i> На главную
-            </a>
-        </div>
+<article class="max-w-4xl mx-auto px-4">
+  {{-- Заголовок --}}
+  <header class="rounded-xl p-6 md:p-8 border shadow-sm mb-6"
+          style="background:#fff; border-color: color-mix(in oklab, var(--color-text,#111827) 10%, #e5e7eb)">
+    <div class="flex items-start md:items-center gap-4 md:gap-6 flex-col md:flex-row">
+      <div class="inline-flex items-center justify-center w-12 h-12 rounded-lg"
+           style="background: color-mix(in oklab, var(--color-primary,#2563eb) 12%, #fff);">
+        @themeIcon('help-circle','w-5 h-5 opacity-80')
+      </div>
+      <div class="flex-1">
+        <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight" style="color: var(--color-text,#111827)">
+          FAQ — Часто задаваемые вопросы
+        </h1>
+        <p class="mt-2 text-sm md:text-base opacity-80" style="color: var(--color-text,#111827)">
+          Быстрые ответы по регистрации, доступам, модулям, шаблонам, медиа и настройкам RU-CMS.
+        </p>
+      </div>
     </div>
+
+    {{-- Поиск по вопросам --}}
+    <div class="mt-5 relative">
+      <input id="faqSearch" type="search" placeholder="Поиск по вопросам…"
+             class="w-full border rounded-lg pl-10 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2"
+             style="border-color: color-mix(in oklab, var(--color-text,#111827) 12%, #e5e7eb);">
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none opacity-60">
+        @themeIcon('search','w-4 h-4')
+      </div>
+    </div>
+  </header>
+
+  {{-- Секция вопросов --}}
+  <section class="rounded-xl p-4 md:p-6 border shadow-sm"
+           style="background:#fff; border-color: color-mix(in oklab, var(--color-text,#111827) 10%, #e5e7eb)">
+
+    <div id="faqList" class="space-y-2 md:space-y-3 text-[15px]">
+
+      {{-- 1. Регистрация --}}
+      <details class="group rounded-lg border overflow-hidden"
+               style="border-color: color-mix(in oklab, var(--color-text,#111827) 12%, #e5e7eb)">
+        <summary class="cursor-pointer select-none list-none px-4 py-3 md:py-3.5 flex items-center gap-3 font-semibold"
+                 style="color: var(--color-text,#111827)">
+          @themeIcon('user-plus','w-4 h-4 opacity-70')
+          <span>Как зарегистрироваться на сайте?</span>
+          <span class="ml-auto transition-transform group-open:rotate-180 opacity-60">@themeIcon('chevron-down','w-4 h-4')</span>
+        </summary>
+        <div class="px-4 pb-4 -mt-1 text-sm opacity-90">
+          Нажмите <a href="{{ route('register') }}" class="underline" style="color:var(--color-primary,#2563eb)">«Регистрация»</a>
+          в верхнем меню, заполните форму и подтвердите e-mail.
+        </div>
+      </details>
+
+      {{-- 2. Восстановление пароля --}}
+      <details class="group rounded-lg border overflow-hidden"
+               style="border-color: color-mix(in oklab, var(--color-text,#111827) 12%, #e5e7eb)">
+        <summary class="cursor-pointer select-none list-none px-4 py-3 md:py-3.5 flex items-center gap-3 font-semibold">
+          @themeIcon('key','w-4 h-4 opacity-70')
+          <span>Забыл(а) пароль — что делать?</span>
+          <span class="ml-auto transition-transform group-open:rotate-180 opacity-60">@themeIcon('chevron-down','w-4 h-4')</span>
+        </summary>
+        <div class="px-4 pb-4 -mt-1 text-sm opacity-90">
+          Перейдите на <a href="{{ route('password.request') }}" class="underline" style="color:var(--color-primary,#2563eb)">страницу восстановления</a>,
+          укажите e-mail — инструкция придёт на почту.
+        </div>
+      </details>
+
+      {{-- 3. Организация --}}
+      <details class="group rounded-lg border overflow-hidden"
+               style="border-color: color-mix(in oklab, var(--color-text,#111827) 12%, #e5e7eb)">
+        <summary class="cursor-pointer select-none list-none px-4 py-3 md:py-3.5 flex items-center gap-3 font-semibold">
+          @themeIcon('building','w-4 h-4 opacity-70')
+          <span>Можно зарегистрироваться как организация?</span>
+          <span class="ml-auto transition-transform group-open:rotate-180 opacity-60">@themeIcon('chevron-down','w-4 h-4')</span>
+        </summary>
+        <div class="px-4 pb-4 -mt-1 text-sm opacity-90">
+          Да. В форме регистрации выберите тип «Юридическое лицо» — появятся поля для ИНН, ОГРН и адреса.
+        </div>
+      </details>
+
+      {{-- 4. Модули --}}
+      <details class="group rounded-lg border overflow-hidden"
+               style="border-color: color-mix(in oklab, var(--color-text,#111827) 12%, #e5e7eb)">
+        <summary class="cursor-pointer select-none list-none px-4 py-3 md:py-3.5 flex items-center gap-3 font-semibold">
+          @themeIcon('boxes','w-4 h-4 opacity-70')
+          <span>Где управлять модулями?</span>
+          <span class="ml-auto transition-transform group-open:rotate-180 opacity-60">@themeIcon('chevron-down','w-4 h-4')</span>
+        </summary>
+        <div class="px-4 pb-4 -mt-1 text-sm opacity-90">
+          В админке на странице <a href="{{ url('/admin/modules') }}" class="underline" style="color:var(--color-primary,#2563eb)">Модули</a>
+          можно включать/выключать, архивировать и скачивать ZIP-архивы модулей.
+        </div>
+      </details>
+
+      {{-- 5. Шаблоны --}}
+      <details class="group rounded-lg border overflow-hidden"
+               style="border-color: color-mix(in oklab, var(--color-text,#111827) 12%, #e5e7eb)">
+        <summary class="cursor-pointer select-none list-none px-4 py-3 md:py-3.5 flex items-center gap-3 font-semibold">
+          @themeIcon('layout','w-4 h-4 opacity-70')
+          <span>Как подключить свой шаблон?</span>
+          <span class="ml-auto transition-transform group-open:rotate-180 opacity-60">@themeIcon('chevron-down','w-4 h-4')</span>
+        </summary>
+        <div class="px-4 pb-4 -mt-1 text-sm opacity-90 space-y-2">
+          Создайте файл в <code class="px-1 rounded bg-gray-100 text-xs">resources/views/frontend/templates/название.blade.php</code> —
+          он появится при создании новости. Пример полного гайда — в разделе ниже.
+        </div>
+      </details>
+
+      {{-- 6. Медиа --}}
+      <details class="group rounded-lg border overflow-hidden"
+               style="border-color: color-mix(in oklab, var(--color-text,#111827) 12%, #e5e7eb)">
+        <summary class="cursor-pointer select-none list-none px-4 py-3 md:py-3.5 flex items-center gap-3 font-semibold">
+          @themeIcon('image','w-4 h-4 opacity-70')
+          <span>Можно использовать видео и изображения?</span>
+          <span class="ml-auto transition-transform group-open:rotate-180 opacity-60">@themeIcon('chevron-down','w-4 h-4')</span>
+        </summary>
+        <div class="px-4 pb-4 -mt-1 text-sm opacity-90">
+          Да. Загружайте прямо в TinyMCE или через
+          <a href="{{ url('/admin/files') }}" class="underline" style="color:var(--color-primary,#2563eb)">менеджер файлов</a>.
+        </div>
+      </details>
+
+      {{-- 7. Безопасность --}}
+      <details class="group rounded-lg border overflow-hidden"
+               style="border-color: color-mix(in oklab, var(--color-text,#111827) 12%, #e5e7eb)">
+        <summary class="cursor-pointer select-none list-none px-4 py-3 md:py-3.5 flex items-center gap-3 font-semibold">
+          @themeIcon('lock','w-4 h-4 opacity-70')
+          <span>Насколько безопасна RU-CMS?</span>
+          <span class="ml-auto transition-transform group-open:rotate-180 opacity-60">@themeIcon('chevron-down','w-4 h-4')</span>
+        </summary>
+        <div class="px-4 pb-4 -mt-1 text-sm opacity-90">
+          Используются <strong>bcrypt</strong> для паролей, <strong>JWT</strong> для API и ролевая модель доступа.
+        </div>
+      </details>
+
+      {{-- 8. Профиль --}}
+      <details class="group rounded-lg border overflow-hidden"
+               style="border-color: color-mix(in oklab, var(--color-text,#111827) 12%, #e5e7eb)">
+        <summary class="cursor-pointer select-none list-none px-4 py-3 md:py-3.5 flex items-center gap-3 font-semibold">
+          @themeIcon('user','w-4 h-4 opacity-70')
+          <span>Как обновить информацию о себе?</span>
+          <span class="ml-auto transition-transform group-open:rotate-180 opacity-60">@themeIcon('chevron-down','w-4 h-4')</span>
+        </summary>
+        <div class="px-4 pb-4 -mt-1 text-sm opacity-90">
+          Зайдите в <a href="{{ route('dashboard.edit') }}" class="underline" style="color:var(--color-primary,#2563eb)">личный кабинет</a>
+          и измените имя, e-mail, пароль и др.
+        </div>
+      </details>
+
+      {{-- 9. Поддержка --}}
+      <details class="group rounded-lg border overflow-hidden"
+               style="border-color: color-mix(in oklab, var(--color-text,#111827) 12%, #e5e7eb)">
+        <summary class="cursor-pointer select-none list-none px-4 py-3 md:py-3.5 flex items-center gap-3 font-semibold">
+          @themeIcon('life-buoy','w-4 h-4 opacity-70')
+          <span>Как обратиться в поддержку?</span>
+          <span class="ml-auto transition-transform group-open:rotate-180 opacity-60">@themeIcon('chevron-down','w-4 h-4')</span>
+        </summary>
+        <div class="px-4 pb-4 -mt-1 text-sm opacity-90">
+          Заполните форму на <a href="{{ url('/contacts') }}" class="underline" style="color:var(--color-primary,#2563eb)">странице «Контакты»</a>
+          или напишите через модуль «Сообщения» в админке.
+        </div>
+      </details>
+    </div>
+  </section>
+
+  {{-- Разворачиваемые подробные инструкции --}}
+  <section class="mt-6 grid gap-6">
+    {{-- Кастомный шаблон: разворачиваемый блок --}}
+    <details class="rounded-xl p-5 md:p-6 border shadow-sm bg-white"
+             style="border-color: color-mix(in oklab, var(--color-text,#111827) 10%, #e5e7eb)">
+      <summary class="cursor-pointer select-none list-none font-semibold flex items-center gap-3">
+        @themeIcon('wrench','w-4 h-4 opacity-70')
+        <span>Как создать собственный шаблон и подключить его?</span>
+        <span class="ml-auto opacity-60">@themeIcon('chevron-down','w-4 h-4')</span>
+      </summary>
+      <div class="mt-4 text-sm opacity-90 space-y-3">
+        <ol class="list-decimal list-inside space-y-2">
+          <li>Создайте Blade-файл:
+            <code class="bg-gray-100 px-2 py-0.5 rounded text-xs block mt-1">resources/views/frontend/templates/custom.blade.php</code>
+          </li>
+          <li>Внутри используйте:
+            <code class="bg-gray-100 px-2 py-0.5 rounded text-xs">$templates['custom']</code>
+            для вывода записей.
+          </li>
+          <li>Добавьте ключ <code class="text-xs">custom</code> в список шаблонов, чтобы он появился при создании новости.</li>
+          <li>На странице подключайте так:
+            <pre class="bg-gray-100 p-3 rounded text-xs overflow-x-auto mt-2">
+&#64;includeIf('frontend.templates.custom', ['templates' => ['custom' => $templates['custom'] ?? collect()]])</pre>
+          </li>
+        </ol>
+        <p class="text-xs opacity-70">
+          Имя файла должно совпадать со значением <code>template</code> у новости. Аналогично можно сделать «Отзывы»,
+          «Галерею», «Контакты» и др.
+        </p>
+      </div>
+    </details>
+
+    {{-- Установка через веб-интерфейс: разворачиваемый блок --}}
+    <details class="rounded-xl p-5 md:p-6 border shadow-sm bg-white"
+             style="border-color: color-mix(in oklab, var(--color-text,#111827) 10%, #e5e7eb)">
+      <summary class="cursor-pointer select-none list-none font-semibold flex items-center gap-3">
+        @themeIcon('server','w-4 h-4 opacity-70')
+        <span>Полная установка RU-CMS через веб-интерфейс</span>
+        <span class="ml-auto opacity-60">@themeIcon('chevron-down','w-4 h-4')</span>
+      </summary>
+      <div class="mt-4 text-sm opacity-90 space-y-3">
+        <ol class="list-decimal list-inside space-y-2">
+          <li>Разместите проект (папку <code class="text-xs">Ru-CMS</code>) в директории сайта,
+            <code class="bg-gray-100 px-2 py-0.5 rounded text-xs block mt-1">/var/www/html/Ru-CMS/public</code></li>
+          <li>Установите зависимости:
+            <pre class="bg-gray-100 p-3 rounded text-xs overflow-x-auto mt-2">composer install
+npm install
+npm run build</pre>
+          </li>
+          <li>Создайте <code class="text-xs">.env</code> из <code class="text-xs">.env backup</code> и укажите БД.</li>
+          <li>Откройте <code class="bg-gray-100 px-2 py-0.5 rounded text-xs">/install</code> — мастер всё сделает сам.</li>
+          <li>Проверьте права на запись:
+            <pre class="bg-gray-100 p-3 rounded text-xs overflow-x-auto mt-2">chmod -R 775 storage bootstrap/cache</pre>
+          </li>
+        </ol>
+      </div>
+    </details>
+
+    {{-- База знаний --}}
+    <div class="rounded-xl p-5 md:p-6 border shadow-sm bg-white"
+         style="border-color: color-mix(in oklab, var(--color-text,#111827) 10%, #e5e7eb)">
+      <h3 class="font-semibold flex items-center gap-2">
+        @themeIcon('book-open','w-4 h-4 opacity-70')
+        <span>База знаний</span>
+      </h3>
+      <ul class="mt-3 text-sm opacity-90 space-y-1">
+        <li><a href="{{ url('/about') }}" class="underline" style="color:var(--color-primary,#2563eb)">Что такое RU-CMS?</a></li>
+        <li><a href="{{ url('/faq') }}" class="underline" style="color:var(--color-primary,#2563eb)">Шаблоны, блоки и категории</a></li>
+        <li><a href="{{ url('/contacts') }}" class="underline" style="color:var(--color-primary,#2563eb)">Поддержка</a></li>
+      </ul>
+    </div>
+
+    {{-- Назад --}}
+    <div class="text-center">
+      <a href="{{ url('/') }}"
+         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-md text-white"
+         style="background: var(--color-primary,#2563eb)">
+        @themeIcon('arrow-left','w-4 h-4')
+        <span class="font-semibold">На главную</span>
+      </a>
+    </div>
+  </section>
+</article>
+
+{{-- Поиск по вопросам --}}
+<script>
+  (function () {
+    const input = document.getElementById('faqSearch');
+    const items = Array.from(document.querySelectorAll('#faqList details'));
+
+    function normalize(s){ return (s || '').toLowerCase().trim(); }
+
+    input?.addEventListener('input', () => {
+      const q = normalize(input.value);
+      items.forEach(d => {
+        const text = normalize(d.innerText);
+        const match = !q || text.includes(q);
+        d.style.display = match ? '' : 'none';
+        if (q && match) d.open = true; // подсказка: раскрываем подходящее
+      });
+    });
+  })();
+</script>
 @endsection

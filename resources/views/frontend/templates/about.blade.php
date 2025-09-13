@@ -1,75 +1,173 @@
-<section class="w-full bg-gradient-to-br from-blue-50 via-white to-blue-100 p-8 md:p-12 shadow rounded-2xl mb-12">
-    {{-- Заголовок секции с иконкой --}}
-    <h2 class="text-3xl font-extrabold text-center text-gray-800 mb-10 tracking-tight flex items-center justify-center gap-2 select-none">
-        <span>🛡️</span> Наша безопасная и мощная CMS
+<section
+  class="relative overflow-hidden rounded-2xl mb-12"
+  style="
+    --about-bg: linear-gradient(135deg, color-mix(in oklab, var(--color-primary,#2563eb) 12%, white), white 40%, color-mix(in oklab, var(--color-accent,#10b981) 10%, white));
+    background: var(--about-bg);
+  "
+>
+  {{-- декоративные круги --}}
+  <div class="pointer-events-none absolute -top-20 -left-24 w-72 h-72 rounded-full opacity-10"
+       style="background: var(--color-primary,#2563eb)"></div>
+  <div class="pointer-events-none absolute -bottom-20 -right-24 w-72 h-72 rounded-full opacity-10"
+       style="background: var(--color-accent,#10b981)"></div>
+
+  <div class="relative z-10 p-6 md:p-10 lg:p-12">
+    {{-- Мета-заголовок --}}
+    <div class="flex items-center justify-center gap-2 mb-3 select-none">
+      <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide"
+            style="background: color-mix(in oklab, var(--color-primary,#2563eb) 12%, white); color: var(--color-text,#111827);">
+        О продукте
+      </span>
+    </div>
+
+    {{-- Заголовок --}}
+    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-center tracking-tight mb-4"
+        style="color: var(--color-text,#111827)">
+      RU&nbsp;CMS —&nbsp;быстрая, безопасная и гибкая
     </h2>
 
-    {{-- Описание --}}
-    <p class="text-center text-gray-700 text-lg max-w-3xl mx-auto mb-8">
-        Добро пожаловать в RU CMS — современную систему управления контентом, разработанную с акцентом на безопасность, производительность и удобство. Наша CMS предлагает широкий спектр возможностей для создания и управления веб-сайтами любого масштаба.
+    {{-- Подзаголовок --}}
+    <p class="text-center max-w-3xl mx-auto text-sm sm:text-base opacity-80 mb-8"
+       style="color: var(--color-text,#111827)">
+      Современная CMS с модульной архитектурой: мощные инструменты контента, редакторы Тем и Фрагментов,
+      а также массовый импорт/экспорт новостей — всё из коробки.
     </p>
 
-    {{-- Основные преимущества --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {{-- Безопасность --}}
-        <div class="flex items-start gap-4">
-            <span class="text-3xl select-none">🔐</span>
-            <div>
-                <h3 class="text-xl font-semibold text-gray-800 mb-2">Современные методы защиты</h3>
-                <p class="text-gray-600">Использование bcrypt для хэширования паролей и поддержка JWT для безопасной аутентификации пользователей.</p>
-            </div>
+    {{-- Фичи --}}
+    @php
+      $cardBase = 'rounded-xl border shadow-sm p-4 sm:p-5 bg-white/80 backdrop-blur transition hover:shadow-md';
+    @endphp
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      {{-- Безопасность --}}
+      <article class="{{ $cardBase }}" style="border-color: color-mix(in oklab, var(--color-primary,#2563eb) 12%, white)">
+        <div class="flex items-start gap-3">
+          <div class="text-2xl select-none">🔐</div>
+          <div>
+            <h3 class="font-semibold mb-1" style="color: var(--color-text,#111827)">Современная защита</h3>
+            <p class="text-sm opacity-75">Хеш паролей, защита сессий, строгие политики доступа.</p>
+          </div>
         </div>
+      </article>
 
-        {{-- SEO-оптимизация --}}
-        <div class="flex items-start gap-4">
-            <span class="text-3xl select-none">📈</span>
-            <div>
-                <h3 class="text-xl font-semibold text-gray-800 mb-2">SEO-оптимизация</h3>
-                <p class="text-gray-600">Автоматическая генерация sitemap.xml и robots.txt для улучшения видимости сайта в поисковых системах.</p>
-            </div>
+      {{-- SEO --}}
+      <article class="{{ $cardBase }}" style="border-color: color-mix(in oklab, var(--color-accent,#10b981) 18%, white)">
+        <div class="flex items-start gap-3">
+          <div class="text-2xl select-none">📈</div>
+          <div>
+            <h3 class="font-semibold mb-1" style="color: var(--color-text,#111827)">SEO-готовность</h3>
+            <p class="text-sm opacity-75">Корректные мета-теги, карты сайта и чистые URL.</p>
+          </div>
         </div>
+      </article>
 
-        {{-- Кастомизация --}}
-        <div class="flex items-start gap-4">
-            <span class="text-3xl select-none">🎨</span>
-            <div>
-                <h3 class="text-xl font-semibold text-gray-800 mb-2">Гибкая кастомизация</h3>
-                <p class="text-gray-600">Поддержка кастомных шаблонов, меню, фото и видеообложек для уникального оформления вашего сайта.</p>
-            </div>
+      {{-- Кастомизация --}}
+      <article class="{{ $cardBase }}" style="border-color: color-mix(in oklab, var(--color-primary,#2563eb) 12%, white)">
+        <div class="flex items-start gap-3">
+          <div class="text-2xl select-none">🎨</div>
+          <div>
+            <h3 class="font-semibold mb-1" style="color: var(--color-text,#111827)">Гибкое оформление</h3>
+            <p class="text-sm opacity-75">Шаблоны, обложки, собственные блоки и макеты.</p>
+          </div>
         </div>
+      </article>
 
-        {{-- Модули --}}
-        <div class="flex items-start gap-4">
-            <span class="text-3xl select-none">🧩</span>
-            <div>
-                <h3 class="text-xl font-semibold text-gray-800 mb-2">Модульная структура</h3>
-                <p class="text-gray-600">Легкое подключение и управление различными модулями для расширения функциональности сайта.</p>
-            </div>
+      {{-- Модули --}}
+      <article class="{{ $cardBase }}" style="border-color: color-mix(in oklab, var(--color-accent,#10b981) 18%, white)">
+        <div class="flex items-start gap-3">
+          <div class="text-2xl select-none">🧩</div>
+          <div>
+            <h3 class="font-semibold mb-1" style="color: var(--color-text,#111827)">Модульная архитектура</h3>
+            <p class="text-sm opacity-75">Подключайте только нужные возможности. Масштабируйтесь легко.</p>
+          </div>
         </div>
+      </article>
 
-        {{-- Производительность --}}
-        <div class="flex items-start gap-4">
-            <span class="text-3xl select-none">⚡</span>
-            <div>
-                <h3 class="text-xl font-semibold text-gray-800 mb-2">Высокая производительность</h3>
-                <p class="text-gray-600">Оптимизированный код и структура обеспечивают быструю загрузку страниц и стабильную работу сайта.</p>
-            </div>
+      {{-- Производительность --}}
+      <article class="{{ $cardBase }}" style="border-color: color-mix(in oklab, var(--color-primary,#2563eb) 12%, white)">
+        <div class="flex items-start gap-3">
+          <div class="text-2xl select-none">⚡</div>
+          <div>
+            <h3 class="font-semibold mb-1" style="color: var(--color-text,#111827)">Высокая скорость</h3>
+            <p class="text-sm opacity-75">Оптимизированные запросы и кэширование для мгновенной отдачи.</p>
+          </div>
         </div>
+      </article>
 
-        {{-- Поддержка --}}
-        <div class="flex items-start gap-4">
-            <span class="text-3xl select-none">🤝</span>
-            <div>
-                <h3 class="text-xl font-semibold text-gray-800 mb-2">Поддержка и сообщество</h3>
-                <p class="text-gray-600">Активное сообщество и регулярные обновления обеспечивают надежную поддержку и развитие CMS.</p>
-            </div>
+      {{-- Поддержка --}}
+      <article class="{{ $cardBase }}" style="border-color: color-mix(in oklab, var(--color-accent,#10b981) 18%, white)">
+        <div class="flex items-start gap-3">
+          <div class="text-2xl select-none">🤝</div>
+          <div>
+            <h3 class="font-semibold mb-1" style="color: var(--color-text,#111827)">Поддержка и обновления</h3>
+            <p class="text-sm opacity-75">Регулярные апдейты, документация и сообщество.</p>
+          </div>
         </div>
+      </article>
+
+      {{-- 🔥 Массовый импорт/экспорт новостей (NewsIO) --}}
+      <article class="{{ $cardBase }} lg:col-span-2"
+               style="border-color: color-mix(in oklab, var(--color-primary,#2563eb) 16%, white)">
+        <div class="flex items-start gap-3">
+          <div class="text-2xl select-none">📦⇄</div>
+          <div class="flex-1">
+            <h3 class="font-semibold mb-1" style="color: var(--color-text,#111827)">
+              Массовый импорт/экспорт новостей
+            </h3>
+            <p class="text-sm opacity-75">
+              Импортируйте ленты и выгружайте контент пакетно (CSV/JSON/фиды). Идеально для миграций и интеграций.
+            </p>
+            @if(Route::has('admin.newsio.index'))
+              <a href="{{ route('admin.newsio.index') }}"
+                 class="inline-block mt-3 px-3 py-1.5 rounded text-white text-sm"
+                 style="background: var(--color-primary,#2563eb)">
+                Открыть модуль NewsIO
+              </a>
+            @endif
+          </div>
+        </div>
+      </article>
+
+      {{-- 🎛️ Редакторы Тем и Фрагментов --}}
+      <article class="{{ $cardBase }}"
+               style="border-color: color-mix(in oklab, var(--color-accent,#10b981) 20%, white)">
+        <div class="flex items-start gap-3">
+          <div class="text-2xl select-none">🎛️</div>
+          <div class="flex-1">
+            <h3 class="font-semibold mb-1" style="color: var(--color-text,#111827)">
+              Редакторы Тем и Фрагментов
+            </h3>
+            <p class="text-sm opacity-75">
+              Визуально меняйте цвета, шрифты, иконки и скругления; конструктор фрагментов на TinyMCE с предпросмотром.
+            </p>
+            <div class="flex flex-wrap gap-2 mt-3">
+              @if(Route::has('admin.visual.themes.index'))
+                <a href="{{ route('admin.visual.themes.index') }}"
+                   class="inline-block px-3 py-1.5 rounded text-white text-sm"
+                   style="background: var(--color-primary,#2563eb)">Темы</a>
+              @endif
+              @if(Route::has('admin.visual.fragments.index'))
+                <a href="{{ route('admin.visual.fragments.index') }}"
+                   class="inline-block px-3 py-1.5 rounded text-white text-sm"
+                   style="background: var(--color-accent,#10b981)">Фрагменты</a>
+              @endif
+            </div>
+          </div>
+        </div>
+      </article>
     </div>
 
-    {{-- Призыв к действию --}}
-    <div class="mt-12 text-center">
-        <a href="#" target="_blank" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg shadow transition">
-            🚀 Начать работу
-        </a>
+    {{-- CTA --}}
+    <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+      <a href="#"
+         class="inline-flex items-center justify-center px-5 py-3 rounded-md text-white font-semibold"
+         style="background: var(--color-primary,#2563eb)">
+        🚀 Начать работу
+      </a>
+      <a href="#"
+         class="inline-flex items-center justify-center px-5 py-3 rounded-md font-semibold"
+         style="color: var(--color-primary,#2563eb); background: white">
+        📘 Документация
+      </a>
     </div>
+  </div>
 </section>

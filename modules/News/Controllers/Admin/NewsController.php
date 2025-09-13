@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Modules\News\Models\News;
-use App\Models\Category;
+use Modules\Categories\Models\Category; // ✅ правильная модель
 
 class NewsController extends Controller
 {
@@ -31,25 +31,26 @@ class NewsController extends Controller
         $newsList = $query->orderByDesc('id')->paginate(10);
 
         $allTemplates = [
-            'default'    => 'Новости',
-            'products'   => 'Товары',
-            'contacts'   => 'Контакты',
-            'gallery'    => 'Галерея',
-            'slideshow'  => 'Слайдшоу',
-            'faq'        => 'Вопросы',
-            'reviews'    => 'Отзывы',
-            'test'       => 'Тест',
-            'base-php'   => 'Уроки PHP база',
-            'base-html'  => 'Уроки HTML база',
-            'base-css'   => 'Уроки CSS база',
-            'base-js'    => 'Уроки JS база',
+            'default'   => 'Новости',
+            'release'   => 'Релизы',
+            'products'  => 'Товары',
+            'contacts'  => 'Контакты',
+            'gallery'   => 'Галерея',
+            'slideshow' => 'Слайдшоу',
+            'faq'       => 'Вопросы',
+            'reviews'   => 'Отзывы',
+            'test'      => 'Тест',
+            'base-php'  => 'Уроки PHP база',
+            'base-html' => 'Уроки HTML база',
+            'base-css'  => 'Уроки CSS база',
+            'base-js'   => 'Уроки JS база',
         ];
 
         $usedTemplates = News::select('template')->distinct()->pluck('template')->toArray();
 
         $templates = array_filter(
             $allTemplates,
-            fn($key) => in_array($key, $usedTemplates),
+            fn ($key) => in_array($key, $usedTemplates),
             ARRAY_FILTER_USE_KEY
         );
 
@@ -84,22 +85,29 @@ class NewsController extends Controller
             'meta_header'      => 'nullable|string|max:255',
         ]);
 
+        $template = $request->input('template', 'default') ?: 'default';
+
         $data = [
             'title'            => $request->input('title'),
             'content'          => $request->input('content'),
-            'slug'             => Str::slug($request->title) . '-' . uniqid(),
+            'slug'             => Str::slug($request->title) . '-' . uniqid(), // генерим единожды
             'published'        => $request->boolean('published'),
-            'template'         => $request->input('template', 'default') ?: 'default',
+            'template'         => $template,
             'meta_title'       => $request->input('meta_title'),
             'meta_description' => $request->input('meta_description'),
             'meta_keywords'    => $request->input('meta_keywords'),
             'meta_header'      => $request->input('meta_header'),
         ];
 
-        if ($data['template'] === 'products') {
-            $data['price'] = $request->input('price');
-            $data['stock'] = $request->input('stock');
+        if ($template === 'products') {
+            $data['price']    = $request->input('price');
+            $data['stock']    = $request->input('stock');
             $data['is_promo'] = $request->boolean('is_promo');
+        } else {
+            // ✅ для НЕ-товаров магазинные поля чистим
+            $data['price']    = null;
+            $data['stock']    = null;
+            $data['is_promo'] = false;
         }
 
         $news = News::create($data);
@@ -114,7 +122,7 @@ class NewsController extends Controller
     public function edit(News $news)
     {
         $categories = Category::all();
-        $templates = $this->loadTemplates();
+        $templates  = $this->loadTemplates();
 
         return view('News::admin.edit', compact('news', 'categories', 'templates'));
     }
@@ -136,22 +144,29 @@ class NewsController extends Controller
             'meta_header'      => 'nullable|string|max:255',
         ]);
 
+        $template = $request->input('template', 'default') ?: 'default';
+
         $data = [
             'title'            => $request->input('title'),
             'content'          => $request->input('content'),
-            'slug'             => Str::slug($request->title),
+            // 'slug'          => ...  // ❌ НЕ меняем slug, чтобы не ломать ссылки
             'published'        => $request->boolean('published'),
-            'template'         => $request->input('template', 'default') ?: 'default',
+            'template'         => $template,
             'meta_title'       => $request->input('meta_title'),
             'meta_description' => $request->input('meta_description'),
             'meta_keywords'    => $request->input('meta_keywords'),
             'meta_header'      => $request->input('meta_header'),
         ];
 
-        if ($data['template'] === 'products') {
-            $data['price'] = $request->input('price');
-            $data['stock'] = $request->input('stock');
+        if ($template === 'products') {
+            $data['price']    = $request->input('price');
+            $data['stock']    = $request->input('stock');
             $data['is_promo'] = $request->boolean('is_promo');
+        } else {
+            // ✅ для НЕ-товаров магазинные поля чистим
+            $data['price']    = null;
+            $data['stock']    = null;
+            $data['is_promo'] = false;
         }
 
         $news->update($data);
@@ -184,7 +199,7 @@ class NewsController extends Controller
 
     public function bulkEdit(Request $request)
     {
-        $ids = explode(',', $request->input('ids', ''));
+        $ids  = explode(',', $request->input('ids', ''));
         $news = News::whereIn('id', $ids)->get();
         return view('News::admin.bulk-edit', compact('news'));
     }
@@ -196,7 +211,7 @@ class NewsController extends Controller
         foreach ($fields as $id => $values) {
             $news = News::find($id);
             if ($news) {
-                $news->update(array_filter($values));
+                $news->update(array_filter($values, fn($v) => $v !== null && $v !== ''));
             }
         }
 
@@ -205,8 +220,12 @@ class NewsController extends Controller
 
     public function show($slug)
     {
-        $newsItem = News::with(['categories', 'slideshow.items'])->where('slug', $slug)->firstOrFail();
-        return view('News::public.show', compact('newsItem'));
+        $newsItem = News::with(['categories', 'slideshow.items'])
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        // ✅ используем вашу вьюху modules/News/Views/frontend/show.blade.php
+        return view('News::frontend.show', compact('newsItem'));
     }
 
     private function loadTemplates(): array
@@ -214,6 +233,7 @@ class NewsController extends Controller
         $customLabels = [
             'about'     => 'О CMS',
             'default'   => 'Новости',
+            'release'   => 'Релизы',      
             'base-php'  => 'Уроки PHP база',
             'base-html' => 'Уроки HTML',
             'base-css'  => 'Уроки CSS',
@@ -228,7 +248,6 @@ class NewsController extends Controller
         ];
 
         $templates = [];
-
         $templatePath = resource_path('views/frontend/templates');
 
         if (File::exists($templatePath)) {
@@ -241,7 +260,7 @@ class NewsController extends Controller
             }
         }
 
-        // ✅ Добавим все customLabels, даже если файл не был найден по какой-то причине
+        // добиваемся наличия русских названий для существующих файлов
         foreach ($customLabels as $key => $label) {
             if (!isset($templates[$key])) {
                 $file = $templatePath . DIRECTORY_SEPARATOR . $key . '.blade.php';
@@ -251,7 +270,7 @@ class NewsController extends Controller
             }
         }
 
-        ksort($templates); // сортировка по ключу (опционально)
+        ksort($templates);
 
         return $templates;
     }

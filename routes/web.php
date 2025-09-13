@@ -57,6 +57,7 @@ Route::get('/', function () {
     $templateKeys = [
     'about',
     'default',
+    'release',
     'base-php',
     'base-html',
     'base-css',

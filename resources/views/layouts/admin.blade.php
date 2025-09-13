@@ -19,8 +19,8 @@
 
   {{-- ВАЖНО: каркас с липким футером --}}
   <div id="admin-wrap" class="min-h-screen flex flex-col pl-16 lg:pl-64 transition-all duration-300">
-    @include('layouts.admin.navbar')
     @include('layouts.admin.header')
+    @include('layouts.admin.navbar')
 
     {{-- растягиваем контент на всю доступную высоту --}}
     <main class="flex-1 p-6">
