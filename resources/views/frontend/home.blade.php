@@ -3,10 +3,9 @@
 @section('title', 'Главная')
 
 @section('content')
-{{-- ВАЖНО: не перекрываем общий фон/цвета темы.
-     Если нужен «карточный» фон — делаем его локально и с var(--radius-md). --}}
+{{-- Не перекрываем общий фон: используем цвета темы --}}
 <div class="px-4 py-8">
-  <div class="max-w-screen-xl mx-auto bg-white bg-opacity-80 dark:bg-gray-900 dark:bg-opacity-80 backdrop-blur-sm rounded-theme p-4">
+  <div class="max-w-screen-xl mx-auto backdrop-blur-sm rounded-theme p-4 bg-theme">
     @php
       $titles = [
           'default'   => 'Новости',

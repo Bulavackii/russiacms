@@ -103,7 +103,6 @@
         .bg-footer-theme  { background: var(--color-footer) }
         .btn-theme        { background: var(--color-primary); color:#fff }
         .rounded-theme    { border-radius: var(--radius-md) }
-        /* Чтобы скругление реально "подхватывалось" Tailwind-классами: */
         .rounded,.rounded-md,.rounded-lg,.rounded-xl,.rounded-2xl { border-radius: var(--radius-md) !important; }
         button,input,.card { border-radius: var(--radius-md) }
     </style>
@@ -118,7 +117,7 @@
 </head>
 
 <body class="relative text-gray-800 min-h-screen flex flex-col border-l border-r border-black overflow-x-hidden"
-      style="color: var(--color-text,#111827); font-family: var(--font-base, Inter, system-ui, sans-serif)">
+      style="background: var(--color-bg,#ffffff); color: var(--color-text,#111827); font-family: var(--font-base, Inter, system-ui, sans-serif)">
 
     {{-- ЕДИНЫЙ фон-паттерн из темы --}}
     <div class="absolute inset-0 z-0 opacity-10 pointer-events-none"
@@ -148,7 +147,6 @@
     @stack('scripts')
     <script src="{{ asset('js/accessibility.js') }}"></script>
 
-    {{-- Инициализация lucide при таком режиме --}}
     @if($iconMode === 'lucide')
         <script>document.addEventListener('DOMContentLoaded', () => window.lucide && window.lucide.createIcons());</script>
     @endif
