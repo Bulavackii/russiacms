@@ -200,17 +200,13 @@ class AppServiceProvider extends ServiceProvider
         if ($installed) {
             try {
                 $notifications = Notification::where('enabled', true)->get();
-            } catch (\Throwable $e) {
-            }
+            } catch (\Throwable $e) {}
             try {
-                if (
-                    class_exists(\Modules\Accessibility\Models\AccessibilitySetting::class)
-                    && Schema::hasTable('accessibility_settings')
-                ) {
+                if (class_exists(\Modules\Accessibility\Models\AccessibilitySetting::class)
+                    && Schema::hasTable('accessibility_settings')) {
                     $accessibility = \Modules\Accessibility\Models\AccessibilitySetting::settings();
                 }
-            } catch (\Throwable $e) {
-            }
+            } catch (\Throwable $e) {}
         }
         View::share('notifications', $notifications);
         View::share('accessibility', $accessibility);
@@ -234,14 +230,17 @@ class AppServiceProvider extends ServiceProvider
                         if ($theme) Cache::forever('active_theme_id', $theme->id);
                     }
                 }
-            } catch (\Throwable $e) {
-            }
+            } catch (\Throwable $e) {}
             $view->with('activeTheme', $theme);
             $view->with('__activeTheme', $theme);
         });
 
-        // Директива @themeIcon('name','classes')
-        Blade::directive('themeIcon', function ($expression) {
+        // Директива @themeIcon('name','classes') — безопасна к пустым вызовам
+        Blade::directive('themeIcon', function ($expression = null) {
+            $expr = trim((string)$expression);
+            if ($expr === '' || $expr === '()') {
+                return "<?php echo \\App\\Providers\\AppServiceProvider::renderThemeIcon(); ?>";
+            }
             return "<?php echo \\App\\Providers\\AppServiceProvider::renderThemeIcon($expression); ?>";
         });
 
@@ -257,10 +256,10 @@ class AppServiceProvider extends ServiceProvider
      *  - bootstrap/tabler/remix/lucide: соответствующие наборы
      *  - иначе: фолбэк на Font Awesome (solid)
      */
-    public static function renderThemeIcon($name, $class = '')
+    public static function renderThemeIcon($name = 'circle-question', $class = '')
     {
-        $name  = trim($name, " \t\n\r\0\x0B'\"");
-        $class = trim($class, " \t\n\r\0\x0B'\"");
+        $name  = $name ? trim($name, " \t\n\r\0\x0B'\"") : 'circle-question';
+        $class = trim((string)$class, " \t\n\r\0\x0B'\"");
 
         try {
             $id    = \Illuminate\Support\Facades\Cache::get('active_theme_id');
@@ -291,7 +290,7 @@ class AppServiceProvider extends ServiceProvider
                 return '<i data-lucide="' . e($name) . '" class="' . e($class) . '"></i>';
             }
 
-            // 3) (опционально) другие наборы — если хочешь, добавь соответствующие классы:
+            // 3) Другие наборы (webfont)
             if ($mode === 'bootstrap') {
                 return '<i class="bi bi-' . e($name) . ' ' . e($class) . '"></i>';
             }
@@ -330,6 +329,7 @@ class AppServiceProvider extends ServiceProvider
                 'github' => 'github',
                 'youtube' => 'youtube',
                 'arrow-up' => 'arrow-up',
+                'circle-question' => 'circle-question',
             ];
             $fa = $map[$name] ?? $name;
             return '<i class="fa-solid fa-' . e($fa) . ' ' . e($class) . '"></i>';
